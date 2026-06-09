@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0e9c0;color:#1a1f2e;line-height:1.6;padding:2rem 1rem 4rem}
+.pg{display:none}.pg.active{display:block}
+.page{max-width:780px;margin:0 auto;background:#fffdf0;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1)}
+.hdr{background:#1a5c2e;padding:2rem 2.5rem 1.5rem;border-radius:16px 16px 0 0}
+.badge{display:inline-block;background:#c8973a;color:#fff;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:.75rem}
+.hdr h1{color:#fff;font-size:26px;font-weight:700}
+.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:1.5rem}
+.meta label{display:block;color:rgba(255,255,255,.9);font-size:12px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-weight:700}
+.meta input{width:100%;background:#fff;border:none;border-radius:8px;padding:8px 12px;color:#1a1f2e;font-size:15px;font-family:inherit}
+.cnt{padding:2rem 2.5rem}
+section{margin-bottom:2rem;border:1px solid #e0e4e8;border-radius:12px;background:#fff;overflow:hidden}
+.sh{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #e0e4e8}
+.s1 .sh{background:#e8f5ec}.s2 .sh{background:#eef2ff}.s3 .sh{background:#1a5c2e}
+.s3 .sh h2,.s3 .sh .sub{color:rgba(255,255,255,.85)}
+.sh h2{font-size:17px;font-weight:700;color:#1a1f2e}
+.sub{font-size:14px;color:#6b7280;margin-left:auto;font-style:italic}
+.sb{padding:22px}
+.q{margin-bottom:20px}.q:last-child{margin-bottom:0}
+.ql{font-size:15px;font-weight:700;color:#374151;margin-bottom:8px}
+.qh{font-size:13px;color:#6b7280;margin-bottom:8px;font-style:italic}
+textarea{font-family:inherit}
+.qi{width:100%;border:1px solid #e0e4e8;border-radius:8px;padding:12px 14px;font-size:16px;color:#1a1f2e;background:#fff;resize:vertical;min-height:70px}
+.qi:focus{outline:none;border-color:#4caf70}
+.qi-sm{min-height:50px;resize:none}
+.etags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.etag{padding:7px 14px;border-radius:20px;border:1.5px solid #e0e4e8;font-size:15px;cursor:pointer;user-select:none;background:#fff;color:#6b7280}
+.etag.on{background:#1a5c2e;border-color:#1a5c2e;color:#fff}
+.placar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.pi{text-align:center}
+.pi-lbl{font-size:13px;color:#6b7280;margin-bottom:4px}
+.pi input[type=range]{width:100%;accent-color:#1a5c2e}
+.pi-val{font-size:18px;font-weight:700;color:#1a5c2e}
+.hbox{background:#fdf3e0;border-left:3px solid #c8973a;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;font-size:15px;color:#7c5e1a;font-style:italic}
+hr.dv{border:none;border-top:1px solid #e0e4e8;margin:18px 0}
+
+/* MUSIC PLAYER */
+#music-player{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#1a5c2e;
+  border-radius:50px;
+  padding:10px 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);
+  z-index:9999;
+  transition:all .3s;
+}
+#music-player .mp-icon{font-size:20px;animation:spin 3s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+#music-player .mp-label{color:#fff;font-size:12px;font-weight:700;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+#music-player .mp-vol-wrap{display:flex;align-items:center;gap:6px}
+#music-player .mp-vol-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:.2s}
+#music-player .mp-vol-btn:hover{background:rgba(255,255,255,.35)}
+#music-player .mp-vol-val{color:#fff;font-size:13px;font-weight:700;min-width:30px;text-align:center}
+
+/* CAMPO */
+.cwrap{background:#1a5c2e;padding-bottom:20px}
+.cintro{padding:0 20px 16px}
+.cintro p{color:rgba(255,255,255,.75);font-size:12.5px;font-style:italic;border-left:3px solid rgba(255,255,255,.25);padding-left:12px}
+.campo{margin:0 20px;background:#1e6b35;border-radius:14px;border:2px solid rgba(255,255,255,.15);min-height:380px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:28px 20px;position:relative}
+.campo::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.12);transform:translateX(-50%)}
+.campo::after{content:'';position:absolute;left:50%;top:50%;width:80px;height:80px;border-radius:50%;border:1px solid rgba(255,255,255,.12);transform:translate(-50%,-50%)}
+.crow{display:flex;gap:24px;justify-content:center;width:100%;position:relative;z-index:1}
+.pcard{display:flex;flex-direction:column;align-items:center;gap:6px}
+.av{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;position:relative;user-select:none}
+.av:hover{border-color:#c8973a;background:rgba(255,255,255,.25)}
+.aved{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:#c8973a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;pointer-events:none}
+.pn{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.5);border-radius:20px;padding:3px 10px;font-size:11px;color:#fff;font-family:inherit;text-align:center;width:90px}
+.pn::placeholder{color:rgba(255,255,255,.85)}
+.pn:focus{outline:none;border-color:#c8973a}
+.pp{font-size:10px;color:rgba(255,255,255,.65);cursor:pointer;padding:4px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.15);white-space:nowrap;text-align:center;user-select:none}
+.pp:hover,.pp.ok{border-color:#c8973a;color:#c8973a;background:rgba(200,151,58,.15)}
+
+/* PICKERS — absolutamente fora de qualquer stacking context */
+#EP,#PP{
+  position:fixed;
+  background:#fff;
+  border:2px solid #1a5c2e;
+  border-radius:12px;
+  padding:14px;
+  box-shadow:0 12px 40px rgba(0,0,0,.3);
+  z-index:2147483647;
+  display:none;
+  pointer-events:auto;
+}
+.pt{font-size:11px;color:#6b7280;margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.eg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:216px}
+.eb{font-size:24px;border:none;background:transparent;cursor:pointer;border-radius:8px;padding:4px;line-height:1.2}
+.eb:hover{background:#f0f0f0}
+.pb{display:block;width:100%;text-align:left;background:transparent;border:none;padding:8px 10px;font-size:13px;font-family:inherit;color:#374151;border-radius:8px;cursor:pointer;min-width:220px}
+.pb:hover{background:#e8f5ec;color:#1a5c2e}
+.pls{font-size:10px;color:#6b7280;display:block}
+
+.nbar{padding:1.5rem 2.5rem 2rem;display:flex;justify-content:flex-end}
+.bnx{display:flex;align-items:center;gap:10px;background:#1a5c2e;color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+.bnx:hover{background:#2e7d45}
+.foot{display:flex;align-items:center;justify-content:space-between;padding:16px 2.5rem;border-top:1px solid #e0e4e8;background:#f8f9fa;border-radius:0 0 16px 16px}
+.foot span{font-size:13px;color:#6b7280}
+.sigs{display:flex;gap:2rem}
+.sig{text-align:center}
+.sig hr{border:none;border-top:1px solid #ccc;margin-bottom:4px;width:120px}
+.sig p{font-size:12px;color:#6b7280}
+
+/* PG2 */
+.p2h{background:#1a5c2e;padding:2.5rem 2.5rem 2rem;border-radius:16px 16px 0 0;text-align:center}
+.p2b{display:inline-block;background:#c8973a;color:#fff;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:1rem}
+.p2h h2{color:#fff;font-size:24px;font-weight:700;margin-bottom:.5rem}
+.p2h p{color:rgba(255,255,255,.65);font-size:15px}
+.fb{margin:2rem 2.5rem;border:2px solid #e0e4e8;border-radius:16px;overflow:hidden;background:#fff}
+.ft{background:#1a5c2e;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:12px}
+.ft h3{color:#fff;font-size:17px;font-weight:600}
+.ft p{color:rgba(255,255,255,.65);font-size:14px}
+.fv{background:linear-gradient(135deg,#f8f4e8,#fdf3e0);padding:1.5rem;border-bottom:1px solid #e0e4e8}
+.fvl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#c8973a;font-weight:700;margin-bottom:8px}
+.fvt{font-size:22px;font-weight:600;color:#1a1f2e;line-height:1.4;font-style:italic;min-height:32px}
+.fvt::before{content:'"';color:#c8973a;font-size:30px;line-height:0;vertical-align:-8px;margin-right:4px}
+.fvt::after{content:'"';color:#c8973a;font-size:30px;line-height:0;vertical-align:-8px;margin-left:4px}
+.rg{display:grid;grid-template-columns:1fr 1fr}
+.rc{padding:1.25rem 1.5rem;border-right:1px solid #e0e4e8;border-bottom:1px solid #e0e4e8;background:#fff}
+.rc:nth-child(2n){border-right:none}
+.rc:nth-last-child(-n+2){border-bottom:none}
+.rl{font-size:14px;text-transform:uppercase;letter-spacing:.8px;color:#6b7280;font-weight:700;margin-bottom:8px}
+.rv{font-size:16px;color:#374151;line-height:1.6;min-height:20px;white-space:pre-wrap}
+.pl2r{display:flex;gap:8px;flex-wrap:wrap}
+.pri{text-align:center;background:#f8f9fa;border-radius:8px;padding:8px 12px;min-width:64px}
+.pri .pll{font-size:10px;color:#6b7280}
+.pri .pvv{font-size:20px;font-weight:700;color:#1a5c2e}
+.trw{display:flex;gap:10px;flex-wrap:wrap}
+.trj{display:flex;align-items:center;gap:6px;background:#f8f9fa;border-radius:20px;padding:4px 10px 4px 6px}
+.ets2{display:flex;flex-wrap:wrap;gap:6px}
+.et2{padding:4px 12px;border-radius:20px;background:#1a5c2e;color:#fff;font-size:13px}
+.rbox{margin:0 2.5rem 1.5rem;background:linear-gradient(135deg,#e8f5ec,#d4eddf);border-radius:14px;border:1.5px solid #a8d5b5;padding:1.25rem 1.5rem}
+.rbox-l{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#1a5c2e;font-weight:700;margin-bottom:8px}
+.rbox-q{font-size:16px;font-weight:600;color:#1a5c2e;margin-bottom:12px}
+.rbox textarea{width:100%;background:#fff;border:1px solid #a8d5b5;border-radius:8px;padding:12px 14px;font-size:15px;font-family:inherit;color:#1a1f2e;resize:none;min-height:70px}
+.bbar{padding:1.5rem 2.5rem 2rem;display:flex;justify-content:space-between;align-items:center}
+.bbk{display:flex;align-items:center;gap:8px;background:transparent;color:#6b7280;border:1px solid #e0e4e8;border-radius:10px;padding:12px 22px;font-size:15px;font-family:inherit;cursor:pointer}
+.bpr{display:flex;align-items:center;gap:8px;background:#1a5c2e;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:15px;font-family:inherit;cursor:pointer}
+
+/* ═══════════════════════════════════════
+   PRINT / PDF  —  contraste e estética
+═══════════════════════════════════════ */
+@media print {
+  /* reset de página */
+  @page { margin: 16mm 14mm; size: A4; }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+
+  /* esconde elementos de navegação e interação */
+  .nbar, .bbar, .bnx, .bbk, .bpr,
+  .foot, #EP, #PP,
+  input[type=range],
+  .aved, .pp { display: none !important; }
+
+  /* mostra as duas páginas empilhadas */
+  .pg { display: block !important; }
+  #pg2 { page-break-before: always; }
+
+  /* container da página */
+  .page {
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  /* ── CABEÇALHO VERDE ── */
+  .hdr, .p2h {
+    background: #1a5c2e !important;
+    border-radius: 0 !important;
+    padding: 20px 24px 16px !important;
+  }
+  .hdr h1, .p2h h2 { color: #fff !important; font-size: 18px !important; }
+  .badge, .p2b {
+    background: #c8973a !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+  }
+  .meta label { color: rgba(255,255,255,.95) !important; font-weight: 700 !important; }
+  .meta input {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1.5px solid #888 !important;
+    border-radius: 6px !important;
+    padding: 5px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  /* ── SEÇÕES ── */
+  section, div.fb { break-inside: avoid; }
+  .s1 .sh { background: #d4eddf !important; }
+  .s2 .sh { background: #dde5fb !important; }
+  .s3 .sh, div[style*="background:#1a5c2e"] {
+    background: #1a5c2e !important;
+  }
+  .sh h2 { color: #111 !important; font-weight: 700 !important; font-size: 14px !important; }
+  .s3 .sh h2 { color: #fff !important; }
+  .sub { color: #444 !important; font-weight: 600 !important; }
+
+  /* ── PERGUNTAS E TEXTO ── */
+  .ql { color: #111 !important; font-weight: 700 !important; font-size: 13px !important; }
+  .qh { color: #444 !important; font-style: italic !important; }
+
+  /* inputs de texto e textareas — borda visível e texto preto */
+  .qi, textarea, .rbox textarea {
+    border: 1.5px solid #999 !important;
+    color: #000 !important;
+    background: #fafafa !important;
+    min-height: 50px !important;
+    font-size: 13px !important;
+  }
+
+  /* ── ETAGS (emoções selecionadas) ── */
+  .etag { border: 1.5px solid #bbb !important; color: #555 !important; background: #f5f5f5 !important; font-size: 12px !important; }
+  .etag.on { background: #1a5c2e !important; border-color: #1a5c2e !important; color: #fff !important; font-weight: 700 !important; }
+
+  /* ── HBOX (dica laranja) ── */
+  .hbox {
+    background: #fdf3e0 !important;
+    border-left: 3px solid #c8973a !important;
+    color: #5a3a00 !important;
+    font-weight: 600 !important;
+  }
+
+  /* ── PLACAR (sliders → mostra só o valor) ── */
+  .pi-lbl { color: #333 !important; font-weight: 700 !important; font-size: 12px !important; }
+  .pi-val {
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    color: #1a5c2e !important;
+    display: block !important;
+  }
+
+  /* ── CAMPO (time de apoio) ── */
+  .cwrap { background: #1a5c2e !important; padding-bottom: 16px !important; }
+  .campo {
+    background: #1e6b35 !important;
+    border: 2px solid rgba(255,255,255,.3) !important;
+    min-height: 280px !important;
+  }
+  .cintro p { color: rgba(255,255,255,.9) !important; font-weight: 600 !important; }
+  .av {
+    background: rgba(255,255,255,.2) !important;
+    border: 2px solid rgba(255,255,255,.5) !important;
+    font-size: 24px !important;
+  }
+  .pn {
+    background: rgba(255,255,255,.9) !important;
+    color: #111 !important;
+    border: 1px solid rgba(255,255,255,.7) !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+  }
+
+  /* ── PG2 — FICHA FINAL ── */
+  .p2h p { color: rgba(255,255,255,.9) !important; font-weight: 600 !important; }
+  .ft { background: #1a5c2e !important; }
+  .ft h3 { color: #fff !important; font-weight: 700 !important; font-size: 14px !important; }
+  .ft p  { color: rgba(255,255,255,.85) !important; font-weight: 600 !important; }
+
+  .fv { background: #fdf3e0 !important; border-bottom: 1.5px solid #ddd !important; }
+  .fvl { color: #c8973a !important; font-weight: 800 !important; }
+  .fvt { color: #111 !important; font-weight: 700 !important; font-size: 17px !important; }
+
+  .rl { color: #333 !important; font-weight: 800 !important; font-size: 11px !important; }
+  .rv { color: #111 !important; font-weight: 500 !important; font-size: 14px !important; }
+
+  .pri { background: #eef5ee !important; border: 1px solid #b0d4b8 !important; }
+  .pri .pll { color: #333 !important; font-weight: 700 !important; }
+  .pri .pvv { color: #1a5c2e !important; font-weight: 900 !important; font-size: 22px !important; }
+
+  .et2 { background: #1a5c2e !important; color: #fff !important; font-weight: 700 !important; }
+  .trj { background: #eef5ee !important; border: 1px solid #b0d4b8 !important; }
+
+  /* reflexão da semana */
+  .rbox { background: #eef5ee !important; border: 1.5px solid #a8d5b5 !important; break-inside: avoid; }
+  .rbox-l { color: #1a5c2e !important; font-weight: 800 !important; }
+  .rbox-q { color: #1a5c2e !important; font-weight: 700 !important; }
+  .rbox textarea {
+    border: 1.5px solid #999 !important;
+    color: #000 !important;
+    background: #fff !important;
+    min-height: 50px !important;
+  }
+
+  /* linha de assinatura */
+  .foot { display: flex !important; background: #f8f9fa !important; border-top: 1.5px solid #ccc !important; }
+  .sig hr { border-top: 1.5px solid #555 !important; }
+  .sig p { color: #333 !important; font-weight: 600 !important; }
+  .foot span { color: #555 !important; font-weight: 500 !important; }
+
+  hr.dv { border-top: 1px solid #ccc !important; }
+  #manual-btn { display: none !important; }
+  #manual-overlay { display: none !important; }
+}
+
+/* MANUAL BUTTON — now inline in header */
+
+/* MANUAL OVERLAY */
+#manual-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 99999;
+  overflow-y: auto;
+  padding: 24px 16px 40px;
+}
+.manual-box {
+  max-width: 680px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 16px 60px rgba(0,0,0,.3);
+  overflow: hidden;
+}
+.manual-hdr {
+  background: #1a5c2e;
+  padding: 1.5rem 2rem 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.manual-hdr-inner { flex: 1; }
+.manual-hdr .m-badge {
+  display: inline-block;
+  background: #c8973a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+.manual-hdr h2 {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.manual-hdr .m-warn {
+  color: rgba(255,255,255,.75);
+  font-size: 11.5px;
+  font-style: italic;
+  margin-top: 5px;
+}
+.manual-close {
+  background: rgba(255,255,255,.2);
+  border: none;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.manual-close:hover { background: rgba(255,255,255,.35); }
+.manual-body { padding: 1.5rem 2rem 2rem; display: flex; flex-direction: column; gap: 16px; }
+
+/* Caixa proposito */
+.m-propbox {
+  border: 2px solid #1a5c2e;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.m-propbox-hdr {
+  background: #1a5c2e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  padding: 8px 16px;
+}
+.m-propbox-body {
+  padding: 14px 16px;
+  background: #f0faf4;
+  font-size: 13.5px;
+  color: #1a1f2e;
+  line-height: 1.7;
+}
+.m-propbox-body strong { color: #1a5c2e; }
+
+/* Caixa sugestão */
+.m-sugbox {
+  border: 2px solid #c8973a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.m-sugbox-hdr {
+  background: #c8973a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  padding: 8px 16px;
+}
+.m-sugbox-body {
+  padding: 14px 16px;
+  background: #fdf8ee;
+}
+.m-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.m-chip {
+  background: #1a5c2e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.m-chip.gold {
+  background: #c8973a;
+}
+.m-num {
+  background: #1a5c2e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.m-num.gold { background: #c8973a; }
+mark {
+  background: #fff3b0;
+  color: #1a1f2e;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.m-arrow {
+  color: #c8973a;
+  font-size: 16px;
+  font-weight: 700;
+}
+.m-divider {
+  border: none;
+  border-top: 2px dashed #c8973a;
+  margin: 10px 0;
+}
+
+/* Steps */
+.m-steps { display: flex; flex-direction: column; gap: 12px; }
+.m-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 14px;
+  border-left: 4px solid #1a5c2e;
+}
+.m-step-num {
+  background: #1a5c2e;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.m-step-text {
+  font-size: 13px;
+  color: #1a1f2e;
+  line-height: 1.65;
+}
+.m-step-text strong { color: #1a5c2e; }
+.m-step-text em { color: #c8973a; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- OVERLAY MANUAL -->
+<div id="manual-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;overflow-y:auto;padding:24px 16px 40px;align-items:flex-start;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+  <div class="manual-box">
+    <div class="manual-hdr">
+      <div class="manual-hdr-inner">
+        <div class="m-badge">📋 Recurso Profissional</div>
+        <h2>Manual de uso</h2>
+        <div class="m-warn">⚠️ <span style="font-size:14px;font-weight:800;color:#fff;letter-spacing:.2px">Exclusivo para profissionais — não leia com o paciente</span></div>
+      </div>
+      <button class="manual-close" onclick="document.getElementById('manual-overlay').style.display='none'">✕</button>
+    </div>
+    <div class="manual-body">
+
+      <!-- CARDS FAIXA ETÁRIA + OBJETIVO -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px;border:2px solid #1a5c2e;border-radius:12px;overflow:hidden">
+          <div style="background:#1a5c2e;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:7px 14px">👦 Faixa etária</div>
+          <div style="padding:12px 14px;background:#f0faf4;font-size:15px;font-weight:700;color:#1a5c2e">A partir de 12 anos</div>
+        </div>
+        <div style="flex:2;min-width:220px;border:2px solid #c8973a;border-radius:12px;overflow:hidden">
+          <div style="background:#c8973a;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:7px 14px">🎯 Objetivo terapêutico</div>
+          <div style="padding:12px 14px;background:#fdf8ee;font-size:14px;font-weight:600;color:#7c5e1a;line-height:1.5">Identificação de objetivos terapêuticos e rede de apoio</div>
+        </div>
+      </div>
+
+      <!-- CAIXA PROPÓSITO -->
+      <div class="m-propbox">
+        <div class="m-propbox-hdr">🎯 Propósito deste material</div>
+        <div class="m-propbox-body">
+          Esse material tem como propósito <mark>estabelecer os objetivos terapêuticos</mark> da terapia com o adolescente.
+          <br><br>
+          <strong>Por que isso é importante?</strong> Objetivos terapêuticos na TCC são essenciais porque <mark>direcionam todo o processo de tratamento</mark>, tornando-o mais <strong>claro, estruturado e focado</strong>.
+          Ajudam paciente e terapeuta a definirem <mark>o que se deseja alcançar</mark>, orientam a <strong>escolha das técnicas</strong> e permitem <mark>acompanhar o progresso</mark> ao longo das sessões. Objetivos bem definidos facilitam a <strong>avaliação dos resultados</strong> e ajustes quando necessário.
+        </div>
+      </div>
+
+      <!-- CAIXA SUGESTÃO DE ORDEM -->
+      <div class="m-sugbox">
+        <div class="m-sugbox-hdr">🗺️ Sugestão de ordem dos recursos</div>
+        <div class="m-sugbox-body">
+          <div class="m-flow">
+            <span class="m-num">1</span>
+            <span class="m-chip">Ficha Tática</span>
+            <span class="m-arrow">→</span>
+            <span class="m-chip">Identificação de Objetivos Terapêuticos</span>
+          </div>
+          <hr class="m-divider">
+          <div class="m-flow">
+            <span class="m-num gold">2</span>
+            <span class="m-chip gold">Chaveamento da Minha Vida</span>
+            <span class="m-arrow">→</span>
+            <span class="m-chip gold">Hierarquização de Exposição</span>
+          </div>
+          <hr class="m-divider">
+          <div class="m-flow">
+            <span class="m-num">3</span>
+            <span class="m-chip">Meu Plano de Jogo</span>
+            <span class="m-arrow">→</span>
+            <span class="m-chip">Plano de Ação Passo a Passo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSO A PASSO -->
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#6b7280;margin-bottom:4px">📌 Como usar esta ficha — passo a passo</div>
+      <div class="m-steps">
+        <div class="m-step">
+          <div class="m-step-num">1</div>
+          <div class="m-step-text">
+            <strong>Digite nos espaços em branco</strong> o que o paciente for respondendo em cada pergunta. Esse é o momento de fazer ele engajar e explorar as questões da vida dele.
+          </div>
+        </div>
+        <div class="m-step">
+          <div class="m-step-num">2</div>
+          <div class="m-step-text">
+            Na parte de <strong>"Quem joga no seu time"</strong>, explore a rede de apoio. O paciente vai falar o nome, escolher o emoji (clique no lápis que está no círculo) e depois escolher a posição (clique no ícone de posição).
+            <br><br>
+            <em>Nesse momento investigue: "Me conta mais dessa pessoa, o que você mais gosta de fazer com ela..."</em>
+          </div>
+        </div>
+        <div class="m-step">
+          <div class="m-step-num">3</div>
+          <div class="m-step-text">
+            Depois de preencher todo o questionário, vá para a <strong>página seguinte</strong> — ela terá um resumo de tudo que foi preenchido. <strong>Baixe em PDF</strong> e você pode mandar para o paciente para ele lembrar aonde quer chegar e quem é a sua rede de apoio.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PG1 -->
+<div class="pg active" id="pg1">
+<div class="page">
+  <div class="hdr" style="position:relative">
+    <button id="manual-btn" onclick="document.getElementById('manual-overlay').style.display='flex'" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);white-space:nowrap">
+      📖 Manual de uso
+    </button>
+    <div style="text-align:center;margin-bottom:1.25rem">
+      <img src="https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Logo.png" alt="Logo" style="height:48px;display:inline-block">
+    </div>
+    <div class="badge">📋 Ficha Tática Terapêutica</div>
+    <h1>⚽ Entendendo os lances do meu jogo</h1>
+    <div class="meta">
+      <div><label>Nome</label><input id="f-nome" type="text" placeholder="Como prefere ser chamado(a)"></div>
+      <div><label>Data</label><input id="f-data" type="date"></div>
+      <div><label>Psicóloga</label><input id="f-psico" type="text" placeholder="Nome da psicóloga"></div>
+    </div>
+  </div>
+  <div class="cnt">
+    <section class="s1">
+      <div class="sh"><span style="font-size:24px">🏆</span><h2>1. Qual campeonato você quer vencer?</h2><span class="sub">Objetivo terapêutico</span></div>
+      <div class="sb">
+        <div class="hbox">Todo time entra em campo com um objetivo. Aqui a gente define o seu — o que você quer conquistar nesse processo.</div>
+        <div class="q"><div class="ql">Se você pudesse mudar uma coisa na sua vida agora, o que seria?</div><textarea id="r-mudar" class="qi" placeholder="Escreva com suas palavras..."></textarea></div>
+        <div class="q"><div class="ql">Como você saberia que está melhorando? O que seria diferente no seu dia a dia?</div><div class="qh">Pense em situações concretas.</div><textarea id="r-melhora" class="qi" placeholder="Ex: eu conseguiria dormir melhor..."></textarea></div>
+        <div class="q"><div class="ql">Qual seria a sua "grande final" — a maior conquista que você gostaria de alcançar?</div><textarea id="r-final" class="qi qi-sm" placeholder="Minha vitória seria..."></textarea></div>
+      </div>
+    </section>
+    <section class="s2">
+      <div class="sh"><span style="font-size:24px">📊</span><h2>2. Como está o jogo hoje?</h2><span class="sub">Mapeamento emocional</span></div>
+      <div class="sb">
+        <div class="hbox">Antes de montar uma estratégia, o técnico analisa como o jogo está. Aqui, você vai contar como as coisas andam por aí.</div>
+        <div class="q"><div class="ql">O que tem te atrapalhado mais ultimamente?</div><textarea id="r-atrapalha" class="qi" placeholder="Pode ser em casa, na escola, nas amizades..."></textarea></div>
+        <div class="q">
+          <div class="ql">Que emoções aparecem com mais frequência?</div>
+          <div class="etags" id="etags">
+            <span class="etag" onclick="this.classList.toggle('on')">😰 Ansiedade</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😨 Medo</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😊 Alegria</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😔 Tristeza</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😡 Raiva</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😴 Cansaço</span>
+            <span class="etag" onclick="this.classList.toggle('on')">🙈 Vergonha</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😞 Culpa</span>
+            <span class="etag" onclick="this.classList.toggle('on')">😶 Solidão</span>
+            <span class="etag" onclick="this.classList.toggle('on')">✨ Outro</span>
+          </div>
+        </div>
+        <div class="q"><div class="ql">Quais são as situações em que você mais sente essas emoções?</div><textarea id="r-situacoes" class="qi" placeholder="Ex: quando minha mãe grita, quando tenho prova..."></textarea></div>
+        <div class="q"><div class="ql">Quando as coisas ficam difíceis, que pensamentos passam pela sua cabeça?</div><div class="qh">Às vezes nossa cabeça diz coisas que não são 100% verdade.</div><textarea id="r-pensamentos" class="qi" placeholder='"não vou conseguir", "não tem jeito"...'></textarea></div>
+        <hr class="dv">
+        <div class="ql" style="margin-bottom:10px">Placar atual — como você avalia cada área? (0 a 10)</div>
+        <div class="placar">
+          <div class="pi"><div class="pi-lbl">🏫 Escola</div><input id="sl-escola" type="range" min="0" max="10" value="5" oninput="this.closest('.pi').querySelector('.pi-val').textContent=this.value"><div class="pi-val">5</div></div>
+          <div class="pi"><div class="pi-lbl">🏠 Família</div><input id="sl-familia" type="range" min="0" max="10" value="5" oninput="this.closest('.pi').querySelector('.pi-val').textContent=this.value"><div class="pi-val">5</div></div>
+          <div class="pi"><div class="pi-lbl">👫 Amizades</div><input id="sl-amizades" type="range" min="0" max="10" value="5" oninput="this.closest('.pi').querySelector('.pi-val').textContent=this.value"><div class="pi-val">5</div></div>
+          <div class="pi"><div class="pi-lbl">😊 Humor</div><input id="sl-humor" type="range" min="0" max="10" value="5" oninput="this.closest('.pi').querySelector('.pi-val').textContent=this.value"><div class="pi-val">5</div></div>
+          <div class="pi"><div class="pi-lbl">😴 Sono</div><input id="sl-sono" type="range" min="0" max="10" value="5" oninput="this.closest('.pi').querySelector('.pi-val').textContent=this.value"><div class="pi-val">5</div></div>
+        </div>
+        <div class="q"><div class="ql">E o que você tem de bom? Quais são os seus pontos fortes?</div><div class="qh">Qualidade, habilidade, algo que as pessoas elogiam em você...</div><textarea id="r-fortes" class="qi" placeholder="Ex: sou criativo, sou leal, não desisto fácil..."></textarea></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- S3 fora do .cnt para evitar overflow:hidden -->
+  <div style="margin:0 2rem 0;border:1px solid #e0e4e8;border-radius:12px;background:#fff;overflow:hidden">
+    <div class="sh s3" style="background:#1a5c2e;border-radius:0">
+      <span style="font-size:24px">🫂</span>
+      <h2 style="color:#fff">3. Quem joga no seu time?</h2>
+      <span class="sub" style="color:rgba(255,255,255,.6)">Rede de apoio</span>
+    </div>
+    <div class="cwrap" style="border-radius:0">
+      <div class="cintro" style="padding-top:16px"><p>Toque no avatar para escolher um emoji, escreva o nome e escolha a posição de cada pessoa.</p></div>
+      <div class="campo">
+        <div class="crow">
+          <div class="pcard">
+            <div class="av" id="av0"><span id="em0">👤</span><span class="aved">✏️</span></div>
+            <input class="pn" id="pn0" type="text" placeholder="Nome">
+            <div class="pp" id="pp0">escolher posição</div>
+          </div>
+        </div>
+        <div class="crow">
+          <div class="pcard">
+            <div class="av" id="av1"><span id="em1">👤</span><span class="aved">✏️</span></div>
+            <input class="pn" id="pn1" type="text" placeholder="Nome">
+            <div class="pp" id="pp1">escolher posição</div>
+          </div>
+          <div class="pcard">
+            <div class="av" id="av2"><span id="em2">👤</span><span class="aved">✏️</span></div>
+            <input class="pn" id="pn2" type="text" placeholder="Nome">
+            <div class="pp" id="pp2">escolher posição</div>
+          </div>
+        </div>
+        <div class="crow">
+          <div class="pcard">
+            <div class="av" id="av3"><span id="em3">👤</span><span class="aved">✏️</span></div>
+            <input class="pn" id="pn3" type="text" placeholder="Nome">
+            <div class="pp" id="pp3">escolher posição</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nbar"><button class="bnx" onclick="goP2()">Ver minha ficha completa ›</button></div>
+  <div class="foot">
+    <span>Ficha Tática Terapêutica · TCC para adolescentes</span>
+    <div class="sigs"><div class="sig"><hr><p>Psicóloga</p></div><div class="sig"><hr><p>Adolescente</p></div></div>
+  </div>
+</div>
+</div>
+
+<!-- PG2 -->
+<div class="pg" id="pg2">
+<div class="page">
+  <div class="p2h">
+    <img src="https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/Logo.png" alt="Logo" style="height:48px;margin-bottom:1rem;display:block;margin-left:auto;margin-right:auto">
+    <div class="p2b">📋 Ficha Técnica Final</div>
+    <h2>⚽ Entendendo os lances do meu jogo</h2>
+    <p id="p2sub">Resumo da sessão</p>
+  </div>
+  <div class="fb">
+    <div class="ft"><span style="font-size:28px">🏆</span><div><h3>Conhecer o jogo é o primeiro passo para mudar o placar.</h3><p>Agora vamos pensar nos próximos passos para avançar no campeonato.</p></div></div>
+    <div class="fv"><div class="fvl">🎯 A grande final que você quer vencer</div><div class="fvt" id="r2-final">—</div></div>
+    <div class="rg">
+      <div class="rc"><div class="rl">🔄 O que quer mudar</div><div class="rv" id="r2-mudar">—</div></div>
+      <div class="rc"><div class="rl">✨ Como vai perceber a melhora</div><div class="rv" id="r2-melhora">—</div></div>
+      <div class="rc"><div class="rl">⚠️ O que atrapalha</div><div class="rv" id="r2-atrapalha">—</div></div>
+      <div class="rc"><div class="rl">💪 Pontos fortes</div><div class="rv" id="r2-fortes">—</div></div>
+      <div class="rc"><div class="rl">❤️ Emoções frequentes</div><div class="rv" id="r2-emocoes">—</div></div>
+      <div class="rc"><div class="rl">🧠 Pensamentos difíceis</div><div class="rv" id="r2-pensamentos">—</div></div>
+      <div class="rc" style="grid-column:1/-1;border-right:none"><div class="rl">📈 Placar atual</div><div class="pl2r" id="r2-placar"></div></div>
+      <div class="rc" style="grid-column:1/-1;border-right:none;border-bottom:none"><div class="rl">🫂 Time de apoio</div><div class="trw" id="r2-time"></div></div>
+    </div>
+  </div>
+  <div class="rbox">
+    <div class="rbox-l">🌱 Reflexão da semana</div>
+    <div class="rbox-q">O que você acha que poderia fazer durante a semana para chegar mais perto do que deseja?</div>
+    <textarea placeholder="Escreva uma ideia pequena e possível..."></textarea>
+  </div>
+  <div class="bbar">
+    <button class="bbk" onclick="goP1()">‹ Voltar e editar</button>
+    <button class="bpr" onclick="window.print()">🖨 Imprimir ficha</button>
+  </div>
+</div>
+</div>
+
+<!-- PICKERS: filhos diretos do body, sem nenhum pai com overflow:hidden -->
+<div id="EP" style="display:none;position:fixed;z-index:2147483647;background:#fff;border:2px solid #1a5c2e;border-radius:12px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.35)">
+  <div style="font-size:11px;color:#6b7280;margin-bottom:10px;font-weight:700;text-transform:uppercase">Escolha um emoji</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:210px">
+    <button onclick="setEmoji('👩🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👩🏻</button>
+    <button onclick="setEmoji('👨🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👨🏻</button>
+    <button onclick="setEmoji('👧🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👧🏻</button>
+    <button onclick="setEmoji('👦🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👦🏻</button>
+    <button onclick="setEmoji('👴🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👴🏻</button>
+    <button onclick="setEmoji('👵🏻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👵🏻</button>
+    <button onclick="setEmoji('👩🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👩🏿</button>
+    <button onclick="setEmoji('👨🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👨🏿</button>
+    <button onclick="setEmoji('👧🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👧🏿</button>
+    <button onclick="setEmoji('👦🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👦🏿</button>
+    <button onclick="setEmoji('👴🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👴🏿</button>
+    <button onclick="setEmoji('👵🏿')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">👵🏿</button>
+    <button onclick="setEmoji('🐶')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🐶</button>
+    <button onclick="setEmoji('🐱')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🐱</button>
+    <button onclick="setEmoji('🦁')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🦁</button>
+    <button onclick="setEmoji('🐻')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🐻</button>
+    <button onclick="setEmoji('⭐')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">⭐</button>
+    <button onclick="setEmoji('❤️')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">❤️</button>
+    <button onclick="setEmoji('🌟')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🌟</button>
+    <button onclick="setEmoji('🦋')" style="font-size:24px;border:none;background:none;cursor:pointer;border-radius:8px;padding:4px">🦋</button>
+  </div>
+</div>
+
+<div id="PP" style="display:none;position:fixed;z-index:2147483647;background:#fff;border:2px solid #1a5c2e;border-radius:12px;padding:10px;box-shadow:0 12px 40px rgba(0,0,0,.35)">
+  <div style="font-size:11px;color:#6b7280;margin-bottom:8px;font-weight:700;text-transform:uppercase">Posição no time</div>
+  <button onclick="setPos('⚽ Atacante — me incentiva a ir em frente')"  style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer;min-width:250px">⚽ Atacante<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">me incentiva a ir em frente</span></button>
+  <button onclick="setPos('🛡️ Zagueiro — me protege quando preciso')"   style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer">🛡️ Zagueiro<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">me protege quando preciso</span></button>
+  <button onclick="setPos('🎯 Meio-campo — sempre presente no dia a dia')" style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer">🎯 Meio-campo<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">sempre presente no dia a dia</span></button>
+  <button onclick="setPos('🧤 Goleiro — me salva nas horas difíceis')"  style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer">🧤 Goleiro<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">me salva nas horas difíceis</span></button>
+  <button onclick="setPos('👨‍💼 Técnico — me orienta e aconselha')"     style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer">👨‍💼 Técnico<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">me orienta e aconselha</span></button>
+  <button onclick="setPos('📣 Torcida — sempre me anima')"               style="display:block;width:100%;text-align:left;background:none;border:none;padding:10px 12px;font-size:14px;font-weight:600;font-family:inherit;color:#1a1f2e;border-radius:8px;cursor:pointer">📣 Torcida<span style="font-size:12px;color:#374151;font-weight:400;display:block;margin-top:2px">sempre me anima</span></button>
+</div>
+
+<!-- MUSIC PLAYER WIDGET -->
+<div id="music-player">
+  <span class="mp-icon" id="mp-spin">🎵</span>
+  <button id="mp-play-btn" onclick="userPlay()" title="Tocar música" style="background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center">▶</button>
+  <div class="mp-vol-wrap">
+    <button class="mp-vol-btn" onclick="changeVol(-10)" title="Diminuir volume">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </button>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.85"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    <span class="mp-vol-val" id="vol-display">25%</span>
+    <button class="mp-vol-btn" onclick="changeVol(10)" title="Aumentar volume">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    </button>
+  </div>
+</div>
+
+<audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
+  <source src="https://livia-430118842660-us-east-1-an.s3.us-east-1.amazonaws.com/The+Official+FIFA+World+Cup+26%E2%84%A2+Theme+-+FIFA+(youtube).mp3" type="audio/mpeg">
+</audio>
+
+<script>
+var audio = document.getElementById('bgMusic');
+var volLevel = 25;
+var isPlaying = false;
+audio.volume = volLevel / 100;
+
+function showPlayBtn() {
+  var btn = document.getElementById('mp-play-btn');
+  btn.style.display = 'flex';
+  document.getElementById('mp-spin').style.animation = 'none';
+  document.getElementById('mp-spin').style.opacity = '.5';
+}
+
+function onPlaying() {
+  isPlaying = true;
+  document.getElementById('mp-play-btn').style.display = 'none';
+  document.getElementById('mp-spin').style.animation = '';
+  document.getElementById('mp-spin').style.opacity = '1';
+}
+
+function userPlay() {
+  audio.muted = false;
+  audio.volume = volLevel / 100;
+  audio.play().then(onPlaying).catch(function(){});
+}
+
+function tryAutoplay() {
+  // Method 1: muted autoplay then unmute
+  audio.muted = true;
+  audio.volume = volLevel / 100;
+  var p = audio.play();
+  if (p !== undefined) {
+    p.then(function() {
+      audio.muted = false;
+      audio.volume = volLevel / 100;
+      onPlaying();
+    }).catch(function() {
+      // Method 2: wait for any user gesture
+      showPlayBtn();
+      ['click','touchstart','keydown'].forEach(function(ev) {
+        document.addEventListener(ev, function handler() {
+          if (!isPlaying) {
+            audio.muted = false;
+            audio.volume = volLevel / 100;
+            audio.play().then(onPlaying).catch(function(){});
+          }
+          document.removeEventListener(ev, handler);
+        });
+      });
+    });
+  }
+}
+
+function changeVol(delta) {
+  volLevel = Math.min(100, Math.max(0, volLevel + delta));
+  audio.muted = false;
+  audio.volume = volLevel / 100;
+  document.getElementById('vol-display').textContent = volLevel + '%';
+  if (!isPlaying) { audio.play().then(onPlaying).catch(function(){}); }
+}
+
+window.addEventListener('load', tryAutoplay);
+
+var cur = -1;
+var EP = document.getElementById('EP');
+var PP = document.getElementById('PP');
+
+function openPicker(pop, anchorId, evt) {
+  evt.stopPropagation();
+  var other = (pop === EP) ? PP : EP;
+  other.style.display = 'none';
+
+  if (pop.style.display === 'block') { pop.style.display = 'none'; cur = -1; return; }
+
+  var anchor = document.getElementById(anchorId);
+  var r = anchor.getBoundingClientRect();
+
+  // position below-center of anchor first (safe default)
+  var L = r.left + r.width/2 - 120;
+  var T = r.bottom + 8;
+
+  pop.style.left = Math.max(8, L) + 'px';
+  pop.style.top  = T + 'px';
+  pop.style.display = 'block';
+
+  // now measure and reposition smartly
+  var pw = pop.offsetWidth;
+  var ph = pop.offsetHeight;
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+
+  // prefer right of anchor
+  L = r.right + 10;
+  T = r.top;
+  if (L + pw > vw - 8) { L = r.left - pw - 10; }   // try left
+  if (L < 8)           { L = Math.max(8, r.left + r.width/2 - pw/2); T = r.bottom + 8; } // fall below
+  // vertical clamp
+  if (T + ph > vh - 8) T = vh - ph - 8;
+  if (T < 8)           T = 8;
+
+  pop.style.left = L + 'px';
+  pop.style.top  = T + 'px';
+}
+
+// Wire up avatars
+for (var i = 0; i < 4; i++) {
+  (function(idx){
+    document.getElementById('av'+idx).addEventListener('click', function(e){ cur=idx; openPicker(EP,'av'+idx,e); });
+    document.getElementById('pp'+idx).addEventListener('click', function(e){ cur=idx; openPicker(PP,'pp'+idx,e); });
+  })(i);
+}
+
+EP.addEventListener('click', function(e){ e.stopPropagation(); });
+PP.addEventListener('click', function(e){ e.stopPropagation(); });
+document.addEventListener('click', function(){ EP.style.display='none'; PP.style.display='none'; cur=-1; });
+
+function setEmoji(e) {
+  if (cur < 0) return;
+  document.getElementById('em'+cur).textContent = e;
+  EP.style.display = 'none';
+}
+function setPos(p) {
+  if (cur < 0) return;
+  var el = document.getElementById('pp'+cur);
+  el.textContent = p;
+  el.classList.add('ok');
+  PP.style.display = 'none';
+}
+
+function goP2() {
+  var nome = document.getElementById('f-nome').value.trim();
+  document.getElementById('p2sub').textContent = nome ? 'Resumo da sessão — '+nome : 'Resumo da sessão';
+  function fill(id,v){ document.getElementById(id).textContent=v||'—'; }
+  fill('r2-final',  document.getElementById('r-final').value.trim());
+  fill('r2-mudar',  document.getElementById('r-mudar').value.trim());
+  fill('r2-melhora',document.getElementById('r-melhora').value.trim());
+  fill('r2-atrapalha',document.getElementById('r-atrapalha').value.trim());
+  fill('r2-fortes', document.getElementById('r-fortes').value.trim());
+  fill('r2-pensamentos',document.getElementById('r-pensamentos').value.trim());
+
+  var tags=document.querySelectorAll('#etags .etag.on');
+  var eEl=document.getElementById('r2-emocoes'); eEl.innerHTML='';
+  if(tags.length){ var w=document.createElement('div');w.className='ets2';
+    tags.forEach(function(t){var s=document.createElement('span');s.className='et2';s.textContent=t.textContent;w.appendChild(s);}); eEl.appendChild(w);
+  } else eEl.textContent='—';
+
+  var areas=[{id:'sl-escola',l:'🏫 Escola'},{id:'sl-familia',l:'🏠 Família'},{id:'sl-amizades',l:'👫 Amizades'},{id:'sl-humor',l:'😊 Humor'},{id:'sl-sono',l:'😴 Sono'}];
+  var pEl=document.getElementById('r2-placar'); pEl.innerHTML='';
+  areas.forEach(function(a){var d=document.createElement('div');d.className='pri';d.innerHTML='<div class="pll">'+a.l+'</div><div class="pvv">'+document.getElementById(a.id).value+'</div>';pEl.appendChild(d);});
+
+  var tEl=document.getElementById('r2-time'); tEl.innerHTML=''; var any=false;
+  for(var i=0;i<4;i++){
+    var n=document.getElementById('pn'+i).value.trim();
+    if(n){any=true;var em=document.getElementById('em'+i).textContent;var pos=document.getElementById('pp'+i).textContent;
+      var d=document.createElement('div');d.className='trj';
+      d.innerHTML='<span style="font-size:18px">'+em+'</span><div><div style="font-weight:600;font-size:11px;color:#1a1f2e">'+n+'</div><div style="font-size:10px;color:#6b7280">'+(pos!=='escolher posição'?pos:'')+'</div></div>';
+      tEl.appendChild(d);}
+  }
+  if(!any) tEl.textContent='—';
+
+  document.getElementById('pg1').classList.remove('active');
+  document.getElementById('pg2').classList.add('active');
+  window.scrollTo(0,0);
+}
+function goP1(){ document.getElementById('pg2').classList.remove('active'); document.getElementById('pg1').classList.add('active'); window.scrollTo(0,0); }
+</script>
+</body>
+</html>
